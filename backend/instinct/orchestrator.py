@@ -58,21 +58,33 @@ async def _safe(name: str, coro: Awaitable[None]) -> None:
         log.exception("%s loop crashed; remaining agents continue", name)
 
 
-async def transcript_consumer(state: SessionState, transcription: TranscriptionStream) -> None:
+async def transcript_consumer(
+    state: SessionState,
+    transcription: TranscriptionStream,
+    *,
+    redactor: Optional[Any] = None,  # SessionRedactor; avoid circular import
+) -> None:
     """Pull utterances off the transcription stream, append to state, signal.
 
-    Producer sets `new_utterance` and never clears it. The Tagger clears the
-    event after it has snapshotted the transcript so it can re-check whether
-    more utterances arrived during processing.
+    When a SessionRedactor is provided, every utterance gets `redacted_text`
+    populated before it lands in SessionState. Agents read `text` (raw); the
+    corpus writer reads `redacted_text` (durable).
+
+    Producer sets `new_utterance` and never clears it. Consumers (Tagger,
+    Topic Tracker) clear the event after snapshotting state.
     """
     try:
         async for utt in transcription.utterances():
+            if redactor is not None:
+                try:
+                    redacted = await redactor.redact(utt.text)
+                    utt = utt.model_copy(update={"redacted_text": redacted})
+                except Exception:
+                    log.exception("redaction failed for %s; storing raw text only", utt.id)
             async with state.transcript_lock:
                 state.transcript.append(utt)
             state.new_utterance.set()
     finally:
-        # Stream ended (mocked transcription drained, or real stream closed):
-        # signal session end so per-agent loops exit.
         state.session_ended.set()
 
 
@@ -80,13 +92,15 @@ async def session_loop(
     state: SessionState,
     transcription: TranscriptionStream,
     agents: AgentSet,
+    *,
+    redactor: Optional[Any] = None,  # SessionRedactor
 ) -> Optional[FinalSpec]:
     """Drive a meeting end-to-end.
 
     Returns the FinalSpec produced by Synthesis, or None on synthesis failure.
     """
     async with asyncio.TaskGroup() as tg:
-        tg.create_task(_safe("transcript", transcript_consumer(state, transcription)))
+        tg.create_task(_safe("transcript", transcript_consumer(state, transcription, redactor=redactor)))
         tg.create_task(_safe(agents.tagger.name, agents.tagger.run(state)))
         tg.create_task(_safe(agents.builder.name, agents.builder.run(state)))
         tg.create_task(_safe(agents.critic.name, agents.critic.run(state)))

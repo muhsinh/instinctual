@@ -1,0 +1,369 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+/*
+ * Tailwind v4 theme bridge.
+ * Maps token CSS variables into Tailwind's namespace so utilities
+ * like `bg-base`, `text-fg-secondary`, `font-mono` work as expected.
+ */
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-elevated-2: var(--bg-elevated-2);
+  --color-bg-elevated-3: var(--bg-elevated-3);
+
+  --color-fg-primary: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-tertiary: var(--fg-tertiary);
+  --color-fg-quaternary: var(--fg-quaternary);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-cool: var(--accent-cool);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+}
+
+/* ─── Reset / base ─── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow-x: clip; max-width: 100%; }
+html { overflow-x: clip; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+body {
+  background: var(--bg-base);
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv11";
+  font-size: var(--text-base);
+  line-height: 1.6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--accent-muted); color: var(--fg-primary); }
+
+/* ─── Focus ring ─── */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ─── Utility primitives ─── */
+.container-page { max-width: var(--container-max); margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 2.5rem); }
+.container-prose { max-width: var(--container-prose); margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 2rem); }
+.container-narrow { max-width: var(--container-narrow); margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 2rem); }
+
+/* Hairline border that respects retina */
+.hairline { box-shadow: 0 0 0 0.5px var(--border-default); }
+
+/* Subtle elevation surface — used by cards and the menu bar panel */
+.surface {
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-elevated-2) 100%);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+.surface-strong {
+  background: linear-gradient(180deg, var(--bg-elevated-2) 0%, var(--bg-elevated-3) 100%);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-panel);
+}
+
+/* Code-voice — used for file paths, recipe names, API names */
+.code-voice {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-xs);
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-primary);
+}
+
+/* Pill — small labels like "Now in private beta" */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border-default);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  color: var(--fg-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.pill-dot {
+  width: 6px; height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulseDot 2.4s var(--ease-in-out) infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+
+/* Button system */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: var(--track-tight);
+  border-radius: var(--radius-md);
+  transition: background var(--dur-fast) var(--ease-out-quart),
+              transform var(--dur-fast) var(--ease-out-quart),
+              box-shadow var(--dur-fast) var(--ease-out-quart);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--fg-primary);
+  color: var(--bg-base);
+}
+.btn-primary:hover { background: #fff; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-secondary {
+  background: transparent;
+  color: var(--fg-primary);
+  border: 1px solid var(--border-strong);
+}
+.btn-secondary:hover { background: var(--bg-elevated); border-color: var(--fg-tertiary); }
+.btn-accent {
+  background: var(--accent);
+  color: #1a0e0e;
+  font-weight: 600;
+}
+.btn-accent:hover { background: var(--accent-hover); box-shadow: var(--shadow-glow); }
+
+/* Headline gradient for the hero */
+.headline {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--track-tighter);
+  line-height: 1.02;
+  background: linear-gradient(180deg, var(--fg-primary) 0%, #c8c1b8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* Defensive: long-word/word-break safety + cap at viewport on mobile */
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  max-width: min(100%, 18ch);
+}
+/* Mobile-specific cap — prevents `ch` from over-resolving when system font fallback kicks in. */
+@media (max-width: 540px) {
+  .headline { font-size: clamp(1.5rem, 9vw, 2.25rem) !important; max-width: min(100%, 13ch) !important; }
+}
+
+/* Eyebrow — small uppercase label above sections */
+.eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-widest);
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  font-weight: 500;
+}
+
+/* Section divider */
+.section { padding-block: clamp(4rem, 12vh, 9rem); position: relative; }
+.section + .section { border-top: 1px solid var(--border-subtle); }
+
+/* MenuBarMock — hide some chrome on narrow screens so the strip doesn't overflow */
+@media (max-width: 540px) {
+  .menubar-hide-narrow { display: none !important; }
+  .nav-cta { display: none !important; }
+}
+
+/* ─── Motion layers ─── */
+
+/* Layer A — Ambient gradient mesh.
+   GPU-only properties (transform, opacity). Mesh sits below content via z-index. */
+.ambient-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Force its own compositor layer */
+  isolation: isolate;
+  contain: strict;
+}
+
+.mesh-blob {
+  position: absolute;
+  width: 70vw;
+  height: 70vw;
+  max-width: 1100px;
+  max-height: 1100px;
+  border-radius: 50%;
+  filter: blur(120px);
+  will-change: transform, opacity;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.mesh-blob-coral {
+  background: radial-gradient(circle, rgba(255, 99, 99, 0.55) 0%, rgba(255, 99, 99, 0.0) 60%);
+  top: -10vw;
+  right: -10vw;
+  opacity: 0.6;
+  animation: meshDrift1 28s var(--ease-in-out) infinite;
+}
+
+.mesh-blob-cool {
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.22) 0%, rgba(125, 211, 252, 0.0) 60%);
+  bottom: -20vw;
+  left: -10vw;
+  opacity: 0.55;
+  animation: meshDrift2 42s var(--ease-in-out) infinite;
+}
+
+.mesh-blob-deep {
+  background: radial-gradient(circle, rgba(140, 30, 30, 0.45) 0%, rgba(140, 30, 30, 0.0) 60%);
+  top: 30vh;
+  left: 35vw;
+  opacity: 0.45;
+  animation: meshDrift3 60s var(--ease-in-out) infinite;
+}
+
+/* Cursor-following blob — its center follows the cursor position via CSS vars
+   set by CursorMotion. No transition; the lerp lives in the CursorMotion RAF. */
+.mesh-blob-cursor {
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle, rgba(255, 99, 99, 0.18) 0%, rgba(255, 99, 99, 0.0) 70%);
+  /* The blob's CENTER lives at (cursor-x, cursor-y). We translate by -50% to center, then offset to cursor. */
+  left: var(--cursor-x, 50%);
+  top: var(--cursor-y, 30%);
+  transform: translate(-50%, -50%);
+  opacity: 0.8;
+  filter: blur(100px);
+  mix-blend-mode: screen;
+}
+
+/* A subtle grid texture for "technical" feel. Static, low-cost. */
+.mesh-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  pointer-events: none;
+}
+
+@keyframes meshDrift1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-6vw, 4vw, 0) scale(1.12); }
+}
+@keyframes meshDrift2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(8vw, -3vw, 0) scale(1.08); }
+}
+@keyframes meshDrift3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.45; }
+  50% { transform: translate3d(-3vw, -5vw, 0) scale(1.15); opacity: 0.6; }
+}
+
+/* All page content needs to sit ABOVE the mesh */
+main, header.site-nav, header.site-hero { position: relative; z-index: 1; }
+main { max-width: 100vw; overflow-x: clip; }
+.site-hero { max-width: 100vw; overflow-x: clip; }
+
+/* Layer B — Scroll-driven perspective shift on MenuBarMock.
+   Variables are set by the scroll RAF in MenuBarMock.tsx. */
+.menu-bar-stage {
+  --mock-rotate-x: 0deg;
+  --mock-translate-y: 0px;
+  --mock-scale: 1;
+  perspective: 1600px;
+  perspective-origin: 50% 30%;
+}
+.menu-bar-stage-inner {
+  transform:
+    rotateX(var(--mock-rotate-x))
+    translateY(var(--mock-translate-y))
+    scale(var(--mock-scale));
+  transform-origin: 50% 35%;
+  will-change: transform;
+}
+
+/* Icon proximity pulse — duration is set by JS lerp; CSS handles the actual animation. */
+.icon-pulse-target {
+  --pulse-dur: 2400ms;
+  animation: iconPulseFade var(--pulse-dur) var(--ease-in-out) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes iconPulseFade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Reduced-motion: freeze all motion */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob, .icon-pulse-target { animation: none !important; }
+  .menu-bar-stage-inner { transform: none !important; }
+  .mesh-blob-cursor { opacity: 0.6; }
+}
+
+/* Hero — defensive min-width: 0 on the flex column so children honor max-width.
+   Without this, flex items default to min-width: auto = min-content, which
+   on long unbreakable strings makes them push the parent wider than viewport. */
+.site-hero, .site-hero * { min-width: 0; }
+.site-hero img, .site-hero svg { max-width: 100%; }
+
+/* Hero grid — 2-col on desktop, stacked on mobile/tablet */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 5rem); }
+}
+
+/* Print stylesheet — used by the deck and the memo for export-to-PDF */
+@media print {
+  body { background: var(--bg-base) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  .page-break { page-break-after: always; break-after: page; }
+}

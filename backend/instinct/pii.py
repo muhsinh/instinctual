@@ -172,3 +172,60 @@ class PIIRedactor:
 
     async def redact_all(self, texts: Iterable[str]) -> list[RedactedResult]:
         return [await self.redact(t) for t in texts]
+
+
+@dataclass
+class SessionRedactor:
+    """Wraps a PIIRedactor with per-session entity → pseudonym consistency.
+
+    Same person across utterances → same pseudonym. Same email → same token.
+    Map is reset per session, never persisted.
+    """
+
+    base: PIIRedactor
+    entity_map: dict[str, str] = field(default_factory=dict)
+    counters: dict[str, int] = field(default_factory=dict)
+    redaction_log: list[dict] = field(default_factory=list)
+
+    async def redact(self, text: str) -> str:
+        if not text:
+            return text
+        result = await self.base.redact(text)
+        if not result.entities:
+            return text
+
+        entities = sorted(result.entities, key=lambda e: e.start)
+        out: list[str] = []
+        cursor = 0
+        for ent in entities:
+            if ent.start < cursor:
+                continue  # overlap; skip
+            out.append(text[cursor:ent.start])
+            out.append(self._pseudonym_for(ent.text, ent.type))
+            cursor = ent.end
+        out.append(text[cursor:])
+        redacted = "".join(out)
+        self.redaction_log.append({
+            "original_len": len(text),
+            "redacted_len": len(redacted),
+            "entity_count": len(entities),
+        })
+        return redacted
+
+    def _pseudonym_for(self, entity_text: str, entity_type: str) -> str:
+        key = f"{entity_type}::{entity_text.strip().lower()}"
+        existing = self.entity_map.get(key)
+        if existing is not None:
+            return existing
+        self.counters[entity_type] = self.counters.get(entity_type, 0) + 1
+        idx = self.counters[entity_type]
+        pseudo = f"[{entity_type}_{idx}]"
+        self.entity_map[key] = pseudo
+        return pseudo
+
+    def stats(self) -> dict:
+        return {
+            "entity_count": sum(self.counters.values()),
+            "by_type": dict(self.counters),
+            "redactions_applied": len(self.redaction_log),
+        }

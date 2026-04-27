@@ -24,12 +24,18 @@ IntentLabel = Literal[
 
 
 class Utterance(BaseModel):
-    """One transcript line. Append-only on SessionState.transcript."""
+    """One transcript line. Append-only on SessionState.transcript.
+
+    `text` is the raw transcript output (what agents read for quality).
+    `redacted_text` is PII-stripped with session-consistent pseudonyms (what
+    the corpus writer persists). When None, no redaction has run.
+    """
 
     id: str
     speaker: str
     text: str
     timestamp_seconds: float
+    redacted_text: Optional[str] = None
 
 
 class UtteranceTag(BaseModel):

@@ -1,0 +1,125 @@
+/*
+ * Instinctual design tokens — Raycast-seeded.
+ * Single source of truth. Do not hardcode colors or spacing in components.
+ */
+
+:root {
+  /* ─── Background scale (warm dark) ─── */
+  --bg-base: #0c0a09;
+  --bg-elevated: #14110f;
+  --bg-elevated-2: #1c1816;
+  --bg-elevated-3: #25201d;
+  --bg-overlay: rgba(12, 10, 9, 0.72);
+
+  /* ─── Foreground scale ─── */
+  --fg-primary: #f5f3f0;
+  --fg-secondary: #a8a39c;
+  --fg-tertiary: #6b6660;
+  --fg-quaternary: #3e3a36;
+
+  /* ─── Borders / dividers ─── */
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* ─── Accent (Raycast coral) ─── */
+  --accent: #ff6363;
+  --accent-hover: #ff7a7a;
+  --accent-muted: rgba(255, 99, 99, 0.12);
+  --accent-glow: rgba(255, 99, 99, 0.24);
+
+  /* ─── Secondary accent (cool) — used sparingly for links/info ─── */
+  --accent-cool: #7dd3fc;
+  --accent-cool-muted: rgba(125, 211, 252, 0.12);
+
+  /* ─── Semantic ─── */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #ff6363;
+
+  /* ─── Type families ─── */
+  /* The --font-geist-* variables are injected by next/font via geist/font on <html>. */
+  --font-display: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", system-ui, sans-serif;
+  --font-body: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  /* ─── Type scale ─── */
+  --text-2xs: 0.6875rem;   /* 11 */
+  --text-xs:  0.75rem;     /* 12 */
+  --text-sm:  0.875rem;    /* 14 */
+  --text-base: 1rem;       /* 16 */
+  --text-lg:  1.125rem;    /* 18 */
+  --text-xl:  1.25rem;     /* 20 */
+  --text-2xl: 1.5rem;      /* 24 */
+  --text-3xl: 1.875rem;    /* 30 */
+  --text-4xl: 2.5rem;      /* 40 */
+  --text-5xl: 3.25rem;     /* 52 */
+  --text-6xl: 4rem;        /* 64 */
+  --text-7xl: 5rem;        /* 80 */
+
+  /* ─── Tracking ─── */
+  --track-tighter: -0.04em;
+  --track-tight: -0.02em;
+  --track-normal: 0;
+  --track-wide: 0.04em;
+  --track-wider: 0.08em;
+  --track-widest: 0.12em;
+
+  /* ─── Spacing scale ─── */
+  --space-px: 1px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+  --space-11: 80px;
+  --space-12: 96px;
+  --space-13: 128px;
+  --space-14: 160px;
+
+  /* ─── Radius ─── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+  --radius-full: 9999px;
+
+  /* ─── Shadow ─── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-panel: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-glow: 0 0 32px var(--accent-glow);
+  --shadow-focus: 0 0 0 3px var(--accent-muted);
+
+  /* ─── Motion ─── */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --dur-instant: 80ms;
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+  --dur-slower: 720ms;
+  --dur-slowest: 1200ms;
+
+  /* ─── Layout ─── */
+  --container-max: 1200px;
+  --container-prose: 65ch;
+  --container-narrow: 720px;
+}
+
+/* Force dark mode — light mode is out of scope for v0. */
+:root { color-scheme: dark; }
