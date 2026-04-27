@@ -24,48 +24,54 @@ Topic: a short label (max 8 words) for what the utterance is about. Be specific 
 
 references_prior: if this utterance directly responds to or builds on a specific prior utterance in the rolling context, output that utterance's id. Otherwise null.
 
-Few-shot examples (study, then mimic format):
+CRITICAL: `references_prior` MUST be an exact id copied verbatim from the rolling
+context above the new utterance, or null. Do NOT invent ids. Do NOT use ids from
+these examples — those are illustrative only. If the new utterance does not
+clearly respond to a specific prior utterance in the rolling context, output null.
+
+Few-shot examples (study format only — do not reuse these ids):
 
 Example 1:
 Rolling context:
-[u_a] A: We have a bug in the auth flow.
-[u_b] B: Yeah, the JWT expiry one.
+[example_a01] A: We have a bug in the auth flow.
+[example_a02] B: Yeah, the JWT expiry one.
 New utterance:
-[u_c] A: Let's roll back yesterday's middleware change.
+[example_a03] A: Let's roll back yesterday's middleware change.
 Output:
-{"intent":"proposal","confidence":0.85,"topic":"roll back middleware change","references_prior":"u_a"}
+{"intent":"proposal","confidence":0.85,"topic":"roll back middleware change","references_prior":"example_a01"}
 
 Example 2:
 Rolling context:
-[u_x] A: Let's plan for Friday.
+[example_b01] A: Let's plan for Friday.
 New utterance:
-[u_y] B: Wait, scratch that — let's wait until we hear from Maria.
+[example_b02] B: Wait, scratch that — let's wait until we hear from Maria.
 Output:
-{"intent":"walked_back","confidence":0.92,"topic":"defer Friday commitment","references_prior":"u_x"}
+{"intent":"walked_back","confidence":0.92,"topic":"defer Friday commitment","references_prior":"example_b01"}
 
 Example 3:
 Rolling context:
-[u1] A: KR1 is the warehouse migration.
-[u2] B: KR2 is dashboard p95 latency under 500ms.
+[example_c01] A: KR1 is the warehouse migration.
+[example_c02] B: KR2 is dashboard p95 latency under 500ms.
 New utterance:
-[u3] B: KR3 should be pipeline test coverage above 70%.
+[example_c03] B: KR3 should be pipeline test coverage above 70%.
 Output:
-{"intent":"proposal","confidence":0.88,"topic":"Q4 KR3 pipeline test coverage","references_prior":"u2"}
+{"intent":"proposal","confidence":0.88,"topic":"Q4 KR3 pipeline test coverage","references_prior":"example_c02"}
 
 Example 4:
 Rolling context:
-[u_a] A: How widespread is the outage?
+[example_d01] A: Anything else for today's standup?
 New utterance:
-[u_b] B: About 30% of requests according to the dashboard.
+[example_d02] B: Nope, that's it.
 Output:
-{"intent":"context","confidence":0.8,"topic":"outage scope","references_prior":"u_a"}
+{"intent":"aside","confidence":0.7,"topic":"standup wrap","references_prior":null}
 
 Example 5:
 Rolling context:
-[u_a] A: We need a dashboard with charts.
+[example_e01] A: We need a dashboard with charts.
 New utterance:
-[u_b] B: Do you mean Streamlit or something custom?
+[example_e02] B: Do you mean Streamlit or something custom?
 Output:
-{"intent":"question","confidence":0.9,"topic":"dashboard tooling choice","references_prior":"u_a"}
+{"intent":"question","confidence":0.9,"topic":"dashboard tooling choice","references_prior":"example_e01"}
 
-Output JSON only.
+Output JSON only. Remember: copy ids verbatim from the actual rolling context
+provided in your input — never use the example ids above.

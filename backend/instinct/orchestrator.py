@@ -14,6 +14,7 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import Optional, Protocol
 
+from .agents.topic_tracker import StubTopicTracker
 from .agents.vision import StubVision
 from .session import SessionState
 from .transcription import TranscriptionStream
@@ -43,7 +44,8 @@ class AgentSet:
     critic: Agent
     clarifier: Agent
     synthesis: SynthesisAgent
-    vision: Optional[Agent] = None  # v1 — peer to transcript stream, not in pipeline
+    vision: Optional[Agent] = None         # v1 — peer to transcript stream
+    topic_tracker: Optional[Agent] = None  # v1 push — assigns utterances to threads
 
 
 async def _safe(name: str, coro: Awaitable[None]) -> None:
@@ -91,16 +93,18 @@ async def session_loop(
         tg.create_task(_safe(agents.clarifier.name, agents.clarifier.run(state)))
         if agents.vision is not None:
             tg.create_task(_safe(agents.vision.name, agents.vision.run(state)))
+        if agents.topic_tracker is not None:
+            tg.create_task(_safe(agents.topic_tracker.name, agents.topic_tracker.run(state)))
 
     # All loops exited (session_ended fired and each agent yielded). Run synthesis.
-    final: Optional[FinalSpec]
+    # Synthesis populates the per-thread final_spec internally; the legacy
+    # `state.final_synthesis` property reads it back from the first thread.
     try:
         final = await agents.synthesis.run_once(state)
     except Exception:
         log.exception("synthesis failed")
         final = None
 
-    state.final_synthesis = final
     return final
 
 
@@ -159,20 +163,22 @@ class StubClarifier:
 @dataclass
 class StubSynthesis:
     """Wire-check synthesis: classifies via heuristic + emits a recipe build_plan
-    using the recipe's stub `build_plan_from_state`. Real Synthesis (LLM-driven)
-    replaces both steps once API keys land."""
+    using the recipe's stub `build_plan_from_state`, then populates a default
+    ArtifactThread so v1 single-thread fixtures behave like the legacy single
+    track. Real Synthesis (LLM-driven) replaces both steps."""
 
     name: str = "synthesis"
 
     async def run_once(self, state: SessionState) -> Optional[FinalSpec]:
-        # Local import to avoid circular: recipes imports session, session is
-        # imported here, and orchestrator is imported by replay/tests etc.
+        # Local import to avoid circular.
         from .recipes import classify_heuristic, get as get_recipe
 
+        thread = await state.ensure_default_thread()
         clf = classify_heuristic(state)
         recipe = get_recipe(clf.archetype)
         plan = recipe.build_plan_from_state(state)
-        return FinalSpec(
+
+        spec = FinalSpec(
             final_spec_markdown="(stub synthesis output)",
             executive_summary="(stub)",
             decisions_made=[],
@@ -184,6 +190,12 @@ class StubSynthesis:
             archetype_confidence=clf.confidence,
             build_plan=plan.model_dump(mode="json"),
         )
+        async with thread.lock:
+            thread.archetype = clf.archetype
+            thread.archetype_confidence = clf.confidence
+            thread.build_plan = spec.build_plan
+            thread.final_spec = spec
+        return spec
 
 
 def stub_agent_set() -> AgentSet:
@@ -194,4 +206,5 @@ def stub_agent_set() -> AgentSet:
         clarifier=StubClarifier(),
         synthesis=StubSynthesis(),
         vision=StubVision(),
+        topic_tracker=StubTopicTracker(),
     )

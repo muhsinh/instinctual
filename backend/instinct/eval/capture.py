@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-# Agent names matching stub_agent_set() / real agents. v1 adds vision.
-AGENT_NAMES = ("tagger", "builder", "critic", "clarifier", "synthesis", "vision")
+# Agent names matching stub_agent_set() / real agents.
+AGENT_NAMES = ("tagger", "topic_tracker", "builder", "critic", "clarifier", "synthesis", "vision")
 
 
 @dataclass

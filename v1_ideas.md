@@ -21,4 +21,4 @@ Out of scope for v0 (do not build, capture ideas here):
 
 ## Ideas captured during build
 
-(none yet)
+- Tagger `references_prior` is unreliable on small fast models (gemma-3n-e2b-it). Few-shot examples taught the model to mimic id *shapes* (`u_a`, `u_08`) rather than copy from the rolling context verbatim. Mitigated by switching example ids to a clearly-illustrative form (`example_a01`) plus an explicit "do not reuse these ids" instruction. If the field stays unreliable in real-meeting fixtures, either remove it from `UtteranceTag` or post-process to validate the referenced `utterance_id` actually exists in the transcript before persisting.

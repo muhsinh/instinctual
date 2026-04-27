@@ -174,6 +174,52 @@ class VisionObservation(BaseModel):
     summary: str = ""
 
 
+class TopicEvent(BaseModel):
+    """Topic Tracker output per utterance (v1 push spec)."""
+
+    utterance_id: str
+    kind: Literal["continues", "revisits", "pivots"]
+    confidence: float
+    target_thread_id: str  # for continues/revisits, existing id; for pivots, new id
+    inferred_topic: Optional[str] = None  # populated on pivots
+    timestamp_seconds: float = 0.0
+
+
+class FeasibilityConcern(BaseModel):
+    """Output from feasibility checks against external services."""
+
+    service: str            # "linear" | "stripe" | "github" | "slack" | etc.
+    reachable: bool
+    issue: Optional[str] = None
+    suggested_alternatives: list[str] = Field(default_factory=list)
+    thread_id: Optional[str] = None
+
+
+class BuildResult(BaseModel):
+    """Output from the Claude Code subprocess driver."""
+
+    archetype: str
+    thread_id: str
+    output_dir: str
+    files_generated: list[str] = Field(default_factory=list)
+    validation_passed: bool = False
+    validation_detail: dict[str, Any] = Field(default_factory=dict)
+    cost_usd: float = 0.0
+    mode: Literal["mock", "live", "fallback_qwen"] = "mock"
+    error: Optional[str] = None
+
+
+class DeploymentResult(BaseModel):
+    """Output from a deployment adapter."""
+
+    deployer: str
+    thread_id: str
+    success: bool
+    url: Optional[str] = None
+    detail: dict[str, Any] = Field(default_factory=dict)
+    error: Optional[str] = None
+
+
 # --- WebSocket messages --------------------------------------------------
 
 # Inbound: app -> backend
@@ -200,8 +246,49 @@ class WSSessionEnd(BaseModel):
     type: Literal["session_end"] = "session_end"
 
 
+class WSScreenSharingState(BaseModel):
+    """Mac signals when the user is/isn't actively screen-sharing. Vision
+    pipeline can throttle frame intake when sharing is off."""
+
+    type: Literal["screen_sharing_state"] = "screen_sharing_state"
+    active: bool
+
+
+class WSSteeringNote(BaseModel):
+    """User mid-meeting note that biases agents toward / away from a direction.
+    Optionally targeted at a specific thread (e.g., 'use Postgres not Mongo
+    for the dashboard')."""
+
+    type: Literal["steering_note"] = "steering_note"
+    text: str
+    target_thread_id: Optional[str] = None
+
+
+class WSPostMeetingRefinement(BaseModel):
+    """User-supplied corrections after the meeting ended; triggers re-synthesis."""
+
+    type: Literal["post_meeting_refinement"] = "post_meeting_refinement"
+    text: str
+
+
+class WSCalendarEvent(BaseModel):
+    """Mac sends Calendar.app metadata at session start so agents prime on it."""
+
+    type: Literal["calendar_event"] = "calendar_event"
+    event: dict[str, Any]  # {title, start, end, attendees: [{email,name}], description, location}
+
+
 InboundMessage = Annotated[
-    Union[WSSessionStart, WSAudioChunk, WSClarificationResponse, WSSessionEnd],
+    Union[
+        WSSessionStart,
+        WSAudioChunk,
+        WSClarificationResponse,
+        WSSessionEnd,
+        WSScreenSharingState,
+        WSSteeringNote,
+        WSPostMeetingRefinement,
+        WSCalendarEvent,
+    ],
     Field(discriminator="type"),
 ]
 
@@ -219,6 +306,7 @@ class WSSpecUpdate(BaseModel):
     version: int
     spec: SpecDraft
     diff: Optional[dict[str, Any]] = None  # JSON merge-patch style; populated when known
+    thread_id: Optional[str] = None  # v1 — per-ArtifactThread targeting
 
 
 class WSClarificationPending(BaseModel):
@@ -248,6 +336,29 @@ class WSError(BaseModel):
     message: str
 
 
+class WSThreadSpawned(BaseModel):
+    type: Literal["thread_spawned"] = "thread_spawned"
+    thread_id: str
+    inferred_topic: str
+    started_at_utterance_id: Optional[str] = None
+
+
+class WSFeasibilityBlocker(BaseModel):
+    type: Literal["feasibility_blocker"] = "feasibility_blocker"
+    service: str
+    issue: str
+    thread_id: Optional[str] = None
+    suggested_alternatives: list[str] = Field(default_factory=list)
+
+
+class WSDeploymentComplete(BaseModel):
+    type: Literal["deployment_complete"] = "deployment_complete"
+    thread_id: str
+    url: str
+    deployer: str
+    success: bool = True
+
+
 OutboundMessage = Annotated[
     Union[
         WSTranscriptUpdate,
@@ -257,6 +368,9 @@ OutboundMessage = Annotated[
         WSCostUpdate,
         WSSynthesisComplete,
         WSError,
+        WSThreadSpawned,
+        WSFeasibilityBlocker,
+        WSDeploymentComplete,
     ],
     Field(discriminator="type"),
 ]
