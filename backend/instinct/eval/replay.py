@@ -26,11 +26,15 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from ..orchestrator import AgentSet, session_loop, stub_agent_set
+from ..orchestrator import (
+    AgentSet, session_loop, stub_agent_set,
+    StubBuilder, StubCritic, StubClarifier, StubSynthesis,
+)
+from ..agents.vision import StubVision
 from ..session import SessionState
 from ..transcription import MockedTranscription
 from ..user_context import load_user_context
-from .capture import RunCapture, run_dir_for
+from .capture import CaptureSink, RunCapture, run_dir_for
 from .fixture import Fixture, load_fixture
 from .scorer_metrics import score_run
 
@@ -61,12 +65,50 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
-def _build_agents(kind: str) -> AgentSet:
+def _build_agents(kind: str, *, capture: RunCapture) -> tuple[AgentSet, list]:
+    """Returns (agents, cleanup_handles).
+
+    `cleanup_handles` are objects whose .close() (sync or async) the caller
+    should invoke after session_loop finishes. Used for the sidecar SQLite
+    handle when the real Tagger is wired.
+    """
     if kind == "stub":
-        return stub_agent_set()
-    raise NotImplementedError(
-        "real agents not yet implemented; rerun with --agents stub for the wire-check"
-    )
+        return stub_agent_set(), []
+
+    if kind == "real":
+        # Real Tagger + stub everything else for this checkpoint. Other agents
+        # progressively swap in as they land.
+        from ..providers.nvidia import NvidiaClient, NvidiaMode
+        from ..pii import PIIRedactor
+        from ..embeddings import TextEmbedder
+        from ..sidecar import Sidecar
+        from ..agents.tagger import Tagger
+
+        try:
+            client = NvidiaClient(mode=NvidiaMode.LIVE)
+        except RuntimeError as e:
+            raise SystemExit(f"--agents real: {e}")
+
+        sidecar = Sidecar(path=capture.fixture_dir / "sidecar.db")
+        sink = CaptureSink(run=capture)
+        tagger = Tagger(
+            client=client,
+            redactor=PIIRedactor(client=client),
+            text_embedder=TextEmbedder(client=client),
+            sidecar=sidecar,
+            capture_sink=sink,
+        )
+        agents = AgentSet(
+            tagger=tagger,
+            builder=StubBuilder(),
+            critic=StubCritic(),
+            clarifier=StubClarifier(),
+            synthesis=StubSynthesis(),
+            vision=StubVision(),
+        )
+        return agents, [sidecar]
+
+    raise ValueError(f"unknown --agents value: {kind}")
 
 
 async def _run(state: SessionState, fixture: Fixture, *, speed: str, agents: AgentSet) -> None:
@@ -78,6 +120,13 @@ async def _run(state: SessionState, fixture: Fixture, *, speed: str, agents: Age
         state.screen_frames.extend(fixture.frames)
         state.new_screen_frame.set()
     await session_loop(state, transcription, agents)
+
+
+def _intent_counts(state: SessionState) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for tag in state.tags.values():
+        counts[tag.intent] = counts.get(tag.intent, 0) + 1
+    return counts
 
 
 def _markdown_summary(report_dict: dict, fixture: Fixture, run_dir: Path, duration_s: float) -> str:
@@ -107,12 +156,24 @@ def main(argv: Optional[list[str]] = None) -> int:
         # Smoke-test code path only in Phase 1.
         log.warning("--audio-input is wired but Phase 1 has no audio fixtures; skipping for now")
 
+    # Load .env so NVIDIA_API_KEY etc. are present for --agents real.
+    try:
+        from dotenv import load_dotenv  # type: ignore
+        load_dotenv()
+    except Exception:
+        pass
+
     fixture = load_fixture(args.fixture)
-    agents = _build_agents(args.agents)
 
     output_root = Path(args.output)
     run_dir = run_dir_for(output_root)
     capture = RunCapture(run_dir=run_dir, fixture_name=fixture.name)
+
+    agents, cleanup = _build_agents(args.agents, capture=capture)
+    # Initialize sidecars before running the session.
+    for h in cleanup:
+        if hasattr(h, "init"):
+            asyncio.run(h.init())
 
     # Snapshot user context (Amendment 4); failure is non-fatal but logged.
     try:
@@ -147,6 +208,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         "cost": state.cost_tracker.snapshot(),
         "transcript_len": len(state.transcript),
         "tags_count": len(state.tags),
+        "intent_distribution": _intent_counts(state),
         "builder_versions": len(state.builder_versions),
         "critic_reviews": len(state.critic_reviews),
         "clarifications_resolved": len(state.resolved_clarifications),

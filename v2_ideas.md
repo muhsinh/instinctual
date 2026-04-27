@@ -16,4 +16,4 @@ Out of scope for v1 per the v1 maxxed spec — do NOT build, capture ideas here:
 
 ## Ideas captured during build
 
-(none yet)
+- NVIDIA Active Speaker Detection — face embedding + audio-visual sync for high-accuracy speaker attribution. Requires separate camera capture pipeline. Slots in after v1 voice fingerprinting hits its limits.
