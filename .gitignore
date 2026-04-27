@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Env
+.env
+.env.local
+
+# Eval run output (Amendment 5: data, not code)
+backend/eval/runs/
+
+# macOS
+.DS_Store
+
+# Xcode
+mac/build/
+mac/DerivedData/
+mac/**/xcuserdata/
+mac/**/*.xcuserstate
+mac/**/Package.resolved
+
+# IDE
+.vscode/
+.idea/
+*.swp

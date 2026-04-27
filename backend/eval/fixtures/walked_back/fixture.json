@@ -1,0 +1,42 @@
+{
+  "name": "walked_back",
+  "metadata": {
+    "duration_seconds": 200,
+    "speakers": ["A", "B"],
+    "description": "Decisions made then reversed mid-meeting. Tests Tagger's walked_back intent and Builder's revision discipline. Should surface a clarification about waiting for Maria.",
+    "bar": {
+      "decision_precision_min": 0.6,
+      "decision_recall_min": 0.6,
+      "max_cost_usd": 1.5,
+      "expected_clarifications_fired_min": 1
+    }
+  },
+  "utterances": [
+    {"id": "wb_u01", "speaker": "A", "text": "We promised the dashboard for next Friday.", "timestamp_seconds": 0.0},
+    {"id": "wb_u02", "speaker": "B", "text": "That's tight but doable if we cut scope.", "timestamp_seconds": 15.0},
+    {"id": "wb_u03", "speaker": "A", "text": "OK let's commit to next Friday for the dashboard.", "timestamp_seconds": 30.0},
+    {"id": "wb_u04", "speaker": "B", "text": "Wait actually I need to check with Maria about the data pipeline first.", "timestamp_seconds": 40.0},
+    {"id": "wb_u05", "speaker": "A", "text": "Hmm. Let's not commit to Friday yet. Hold off on that.", "timestamp_seconds": 55.0},
+    {"id": "wb_u06", "speaker": "B", "text": "Right, scratch that. We'll re-decide once we've heard from Maria.", "timestamp_seconds": 70.0},
+    {"id": "wb_u07", "speaker": "A", "text": "Maybe shoot for the following Friday instead.", "timestamp_seconds": 85.0},
+    {"id": "wb_u08", "speaker": "B", "text": "Yeah, let's plan for the 14th tentatively, pending Maria's confirmation.", "timestamp_seconds": 100.0},
+    {"id": "wb_u09", "speaker": "A", "text": "Tentative ETA 14th, confirmation needed from Maria.", "timestamp_seconds": 115.0},
+    {"id": "wb_u10", "speaker": "B", "text": "Got it.", "timestamp_seconds": 130.0},
+    {"id": "wb_u11", "speaker": "A", "text": "We also need to decide on the chart library. Use the existing recharts or switch to visx?", "timestamp_seconds": 145.0},
+    {"id": "wb_u12", "speaker": "B", "text": "I'd say keep recharts. Switching is a tax we don't need.", "timestamp_seconds": 160.0},
+    {"id": "wb_u13", "speaker": "A", "text": "Agreed. Keep recharts.", "timestamp_seconds": 175.0},
+    {"id": "wb_u14", "speaker": "B", "text": "Anything else?", "timestamp_seconds": 190.0},
+    {"id": "wb_u15", "speaker": "A", "text": "That's it.", "timestamp_seconds": 200.0}
+  ],
+  "ground_truth": {
+    "decisions": [
+      {"text": "Tentative dashboard ETA the 14th, pending Maria's confirmation on the data pipeline", "source_utterance_ids": ["wb_u08", "wb_u09"]},
+      {"text": "Keep using recharts (do not switch to visx)", "source_utterance_ids": ["wb_u12", "wb_u13"]}
+    ],
+    "open_questions": [
+      {"text": "Confirmation from Maria on data pipeline timing for the dashboard", "blocking": true}
+    ],
+    "expected_clarifications_fired_min": 1,
+    "topic_shifts_at_seconds": []
+  }
+}

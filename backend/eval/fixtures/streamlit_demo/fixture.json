@@ -1,0 +1,42 @@
+{
+  "name": "streamlit_demo",
+  "metadata": {
+    "duration_seconds": 180,
+    "speakers": ["A", "B"],
+    "description": "v1 Phase A: team agrees to build a Streamlit dashboard, references an existing chart on screen.",
+    "expected_archetype": "streamlit_dashboard",
+    "bar": {
+      "decision_precision_min": 0.6,
+      "decision_recall_min": 0.6,
+      "max_cost_usd": 2.0,
+      "expected_clarifications_fired_min": 0
+    }
+  },
+  "utterances": [
+    {"id": "sd_u01", "speaker": "A", "text": "We need a dashboard for the activation funnel.", "timestamp_seconds": 0.0},
+    {"id": "sd_u02", "speaker": "B", "text": "Streamlit is fine. We can host it on Modal.", "timestamp_seconds": 12.0},
+    {"id": "sd_u03", "speaker": "A", "text": "It should pull from the warehouse — Postgres replica.", "timestamp_seconds": 25.0},
+    {"id": "sd_u04", "speaker": "B", "text": "Top metric: weekly activated users. Bar chart by week.", "timestamp_seconds": 40.0},
+    {"id": "sd_u05", "speaker": "A", "text": "Plus a funnel chart for the four onboarding steps.", "timestamp_seconds": 55.0},
+    {"id": "sd_u06", "speaker": "B", "text": "Filters: date range and country.", "timestamp_seconds": 70.0},
+    {"id": "sd_u07", "speaker": "A", "text": "Look at this existing dashboard - we want similar layout, sidebar with filters.", "timestamp_seconds": 85.0},
+    {"id": "sd_u08", "speaker": "B", "text": "Yes, sidebar layout is the right call.", "timestamp_seconds": 100.0},
+    {"id": "sd_u09", "speaker": "A", "text": "Owner: me. I'll have a draft by end of week.", "timestamp_seconds": 115.0},
+    {"id": "sd_u10", "speaker": "B", "text": "Sounds good.", "timestamp_seconds": 130.0},
+    {"id": "sd_u11", "speaker": "A", "text": "To recap: Streamlit dashboard, Postgres replica source, weekly activated users bar chart, four-step funnel chart, sidebar filters for date and country, owner is me.", "timestamp_seconds": 145.0},
+    {"id": "sd_u12", "speaker": "B", "text": "Got it.", "timestamp_seconds": 165.0}
+  ],
+  "ground_truth": {
+    "decisions": [
+      {"text": "Build a Streamlit dashboard for the activation funnel", "source_utterance_ids": ["sd_u01", "sd_u02"]},
+      {"text": "Source data from the Postgres replica", "source_utterance_ids": ["sd_u03"]},
+      {"text": "Include a weekly activated users bar chart and a four-step funnel chart", "source_utterance_ids": ["sd_u04", "sd_u05"]},
+      {"text": "Sidebar layout with date-range and country filters", "source_utterance_ids": ["sd_u06", "sd_u07", "sd_u08"]},
+      {"text": "A is the owner; draft by end of week", "source_utterance_ids": ["sd_u09"]}
+    ],
+    "open_questions": [],
+    "expected_clarifications_fired_min": 0,
+    "topic_shifts_at_seconds": []
+  },
+  "frames": []
+}

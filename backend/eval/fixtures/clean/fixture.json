@@ -1,0 +1,40 @@
+{
+  "name": "clean",
+  "metadata": {
+    "duration_seconds": 160,
+    "speakers": ["A", "B"],
+    "description": "Clean meeting: bug triage with three uncontested decisions. Tight bar.",
+    "bar": {
+      "decision_precision_min": 0.7,
+      "decision_recall_min": 0.7,
+      "max_cost_usd": 1.0,
+      "expected_clarifications_fired_min": 0
+    }
+  },
+  "utterances": [
+    {"id": "clean_u01", "speaker": "A", "text": "We need to talk about the bug in the auth flow that came in last night.", "timestamp_seconds": 0.0},
+    {"id": "clean_u02", "speaker": "B", "text": "Right, the JWT one with the expiry not being respected.", "timestamp_seconds": 10.0},
+    {"id": "clean_u03", "speaker": "A", "text": "I think rolling back yesterday's middleware change is the right call.", "timestamp_seconds": 20.0},
+    {"id": "clean_u04", "speaker": "B", "text": "Yeah, the change was supposed to fix the timezone issue but it broke JWT expiry.", "timestamp_seconds": 30.0},
+    {"id": "clean_u05", "speaker": "A", "text": "OK so let's roll back the middleware change.", "timestamp_seconds": 40.0},
+    {"id": "clean_u06", "speaker": "B", "text": "Agreed. We can do that today.", "timestamp_seconds": 50.0},
+    {"id": "clean_u07", "speaker": "A", "text": "For the timezone fix we can cherry-pick the smaller patch onto the release branch.", "timestamp_seconds": 60.0},
+    {"id": "clean_u08", "speaker": "B", "text": "That's cleaner. Let's cherry-pick the timezone fix to the release branch.", "timestamp_seconds": 75.0},
+    {"id": "clean_u09", "speaker": "A", "text": "And we should add a regression test for JWT expiry so this doesn't bite again.", "timestamp_seconds": 90.0},
+    {"id": "clean_u10", "speaker": "B", "text": "Definitely. Add a regression test for JWT expiry.", "timestamp_seconds": 105.0},
+    {"id": "clean_u11", "speaker": "A", "text": "Anything else?", "timestamp_seconds": 120.0},
+    {"id": "clean_u12", "speaker": "B", "text": "That's it I think.", "timestamp_seconds": 130.0},
+    {"id": "clean_u13", "speaker": "A", "text": "OK. To summarize: roll back middleware, cherry-pick timezone fix, add JWT regression test.", "timestamp_seconds": 140.0},
+    {"id": "clean_u14", "speaker": "B", "text": "Yep, three things.", "timestamp_seconds": 155.0}
+  ],
+  "ground_truth": {
+    "decisions": [
+      {"text": "Roll back yesterday's auth middleware change", "source_utterance_ids": ["clean_u03", "clean_u05", "clean_u06"]},
+      {"text": "Cherry-pick the timezone fix to the release branch", "source_utterance_ids": ["clean_u07", "clean_u08"]},
+      {"text": "Add a regression test for JWT expiry", "source_utterance_ids": ["clean_u09", "clean_u10"]}
+    ],
+    "open_questions": [],
+    "expected_clarifications_fired_min": 0,
+    "topic_shifts_at_seconds": []
+  }
+}

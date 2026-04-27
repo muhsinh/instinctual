@@ -1,0 +1,50 @@
+{
+  "name": "topic_shift",
+  "metadata": {
+    "duration_seconds": 260,
+    "speakers": ["A", "B"],
+    "description": "Mid-meeting pivot from Q4 OKRs to an active production incident. Tests Builder's handling of scope changes without losing prior context.",
+    "bar": {
+      "decision_precision_min": 0.6,
+      "decision_recall_min": 0.7,
+      "max_cost_usd": 2.0,
+      "expected_clarifications_fired_min": 1
+    }
+  },
+  "utterances": [
+    {"id": "ts_u01", "speaker": "A", "text": "We need to lock down Q4 OKRs for the data team.", "timestamp_seconds": 0.0},
+    {"id": "ts_u02", "speaker": "B", "text": "Top of my list is finishing the metrics warehouse migration.", "timestamp_seconds": 15.0},
+    {"id": "ts_u03", "speaker": "A", "text": "Agreed, that's KR1. What about KR2?", "timestamp_seconds": 30.0},
+    {"id": "ts_u04", "speaker": "B", "text": "I'd say latency on the analytics dashboard, getting p95 under 500ms.", "timestamp_seconds": 45.0},
+    {"id": "ts_u05", "speaker": "A", "text": "Yes. Latency on dashboard p95 under 500ms is KR2.", "timestamp_seconds": 60.0},
+    {"id": "ts_u06", "speaker": "B", "text": "KR3 should be pipeline test coverage above 70%.", "timestamp_seconds": 75.0},
+    {"id": "ts_u07", "speaker": "A", "text": "Sure. Pipeline test coverage above 70% as KR3.", "timestamp_seconds": 90.0},
+    {"id": "ts_u08", "speaker": "B", "text": "That gives us three solid KRs.", "timestamp_seconds": 105.0},
+    {"id": "ts_u09", "speaker": "A", "text": "Hold on - Sam just messaged. Production incident.", "timestamp_seconds": 120.0},
+    {"id": "ts_u10", "speaker": "B", "text": "What's the issue?", "timestamp_seconds": 130.0},
+    {"id": "ts_u11", "speaker": "A", "text": "Customers are getting 502s from the API gateway.", "timestamp_seconds": 140.0},
+    {"id": "ts_u12", "speaker": "B", "text": "How widespread?", "timestamp_seconds": 155.0},
+    {"id": "ts_u13", "speaker": "A", "text": "About 30% of requests according to the dashboard.", "timestamp_seconds": 165.0},
+    {"id": "ts_u14", "speaker": "B", "text": "When did it start?", "timestamp_seconds": 175.0},
+    {"id": "ts_u15", "speaker": "A", "text": "Fourteen minutes ago.", "timestamp_seconds": 185.0},
+    {"id": "ts_u16", "speaker": "A", "text": "We need someone to triage immediately.", "timestamp_seconds": 195.0},
+    {"id": "ts_u17", "speaker": "B", "text": "I can take it. I'll page the SRE team and start investigating.", "timestamp_seconds": 210.0},
+    {"id": "ts_u18", "speaker": "A", "text": "Good. I'll keep our 3pm clear so you can update us.", "timestamp_seconds": 225.0},
+    {"id": "ts_u19", "speaker": "B", "text": "Will do.", "timestamp_seconds": 240.0},
+    {"id": "ts_u20", "speaker": "A", "text": "OK that's enough OKRs for now. Let's reconvene tomorrow on those.", "timestamp_seconds": 250.0}
+  ],
+  "ground_truth": {
+    "decisions": [
+      {"text": "Q4 KR1: finish the metrics warehouse migration", "source_utterance_ids": ["ts_u02", "ts_u03"]},
+      {"text": "Q4 KR2: analytics dashboard p95 latency under 500ms", "source_utterance_ids": ["ts_u04", "ts_u05"]},
+      {"text": "Q4 KR3: pipeline test coverage above 70%", "source_utterance_ids": ["ts_u06", "ts_u07"]},
+      {"text": "B will triage the API gateway 502 incident and page SRE", "source_utterance_ids": ["ts_u17"]},
+      {"text": "Reconvene tomorrow to finalize OKRs", "source_utterance_ids": ["ts_u20"]}
+    ],
+    "open_questions": [
+      {"text": "Root cause of API gateway 502s affecting ~30% of traffic", "blocking": true}
+    ],
+    "expected_clarifications_fired_min": 1,
+    "topic_shifts_at_seconds": [120]
+  }
+}
